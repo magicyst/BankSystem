@@ -4,28 +4,30 @@ package com.cx.bank.util;
  * Created by Administrator on 2018/6/19.
  */
 
+
 /**
- * 取款异常类
- *      当取款金额为负数的时候抛异常
+ * 取款异常
+ *      当取款金额大于余额抛出异常
  */
-public class AccountOverDrawnException extends Exception {
+public class InvalidDepositException extends Exception {
 
 
     /**
      * 默认错误信息
      */
-    public AccountOverDrawnException(){
+    public InvalidDepositException(){
 
-        super("取款超出余额异常");
+        super("存款为负数异常");
+
     }
 
     /**
      * 错误信息注入
      * @param message 错误信息
      */
-    public AccountOverDrawnException(String message){
+    public InvalidDepositException(String message){
 
-        super(message);
+       super(message);
 
     }
 
@@ -39,6 +41,7 @@ public class AccountOverDrawnException extends Exception {
 
         return super.getMessage();
     }
+
 
     /**
      * 重写父类方法

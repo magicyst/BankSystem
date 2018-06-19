@@ -44,7 +44,7 @@ public class Money {
     }
 
 
-    public boolean isSafa() {
+    public boolean isSafe() {
 
         if(this.money < 0)
             this.safa = false;
