@@ -9,13 +9,26 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * @version bank1.5
+ * @author Administrator yst
+ * 系统配置装载类
  * Created by Administrator on 2018/7/3.
  */
 public class BankConfigure {
 
     private Dao dao = new Dao(); //dao配置
 
+
+
     private final static String path = "bankconfig.xml"; //文件位置
+
+
+    /**
+     * 创建配置对象初始化
+     */
+    public BankConfigure(){
+         init();
+    }
 
     /**
      * 加载bankconfig.xml文件
@@ -42,8 +55,8 @@ public class BankConfigure {
             //找到dao指定的默认数据源节点下的配置
             List<Element> properties = ele_dao.selectNodes("//dataSrc[@type='"+dao_default+"']/property");
 
-            //创建一个hashmapd对象
-            HashMap<String,String> property = new HashMap<String, String>();
+            //创建一个HashMap对象
+            HashMap<String,String> property = new HashMap();
 
             //遍历配置存入map
             for(Element e : properties){
@@ -65,24 +78,19 @@ public class BankConfigure {
             //设置dao的数据源配置
             dao.setDataSrc(dataSrc);
 
-            try {
-                System.out.println(dao.getInstance().toString());
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            }
-
         }catch (DocumentException e){
 
         }
     }
 
 
-    public static void main(String[] args) {
-
-        new BankConfigure().init();
+    //geter and seter object of dao
+    public Dao getDao() {
+        return dao;
     }
+
+    public void setDao(Dao dao) {
+        this.dao = dao;
+    }
+
 }

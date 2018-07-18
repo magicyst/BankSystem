@@ -15,6 +15,7 @@ import java.util.Properties;
 public class ProperFilePo {
 
     //用户信息文件的储存格式
+    public static final String Template_url = ProperFilePo.class.getResource("/").getPath()+"filedata\\template.properties";
     private String username;    //用户名
     private String password;    //密码
     private Double money;       //余额
@@ -25,18 +26,15 @@ public class ProperFilePo {
     //初始读取模板Properties文件
     {
         Reader read = null;
-        String filename = null;
         try{
             profile = new Properties();
-            filename = "filedata\\template.properties";
-            read = new FileReader(filename);
+            read = new FileReader(Template_url);
             profile.load(read);
         } catch(FileNotFoundException e){
 
             System.out.println("初始化文件资源异常!");
         } catch(IOException e){
 
-            System.out.println(e);
             try {
                 read.close();
             } catch (IOException e1) {
@@ -58,7 +56,7 @@ public class ProperFilePo {
 
     /**
      * 加载指定用户文件读取到改对象中
-     * @param username
+     * @param username 指定的用户名,通过用户名搜索
      * @throws BankSystemLoginException
      */
     public ProperFilePo(String username) throws BankSystemLoginException{

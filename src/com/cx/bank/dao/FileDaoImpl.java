@@ -3,8 +3,8 @@ package com.cx.bank.dao;
 import com.cx.bank.model.UserBean;
 import com.cx.bank.util.*;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by Administrator on 2018/6/20.
@@ -23,15 +23,16 @@ public class FileDaoImpl implements BankDaoInterface{
     //该文件dao维持的一个用户Properties文件对象
     private static ProperFilePo proread = null;
     //文件存储路径
-    public  static final String FILE_URL = "filedata\\register\\";
+    public  static final String FILE_URL = FileDaoImpl.class.getResource("/").getPath()+"filedata\\register\\";
 
 
 
     /**
      * 1.注册
      *      1.1 判断注册用户是否存在
-     * @param user
-     * @return 如果注册用户存在返回false，否则返回true
+     * @param user 注册用户bean
+     * @exception BankSystemRegisterException 注册异常:如果为找到该用户文件,这注册异常
+     * @exception IOException 文件读取异常
      */
     @Override
     public void register(UserBean user) throws BankSystemRegisterException,IOException {
@@ -59,8 +60,9 @@ public class FileDaoImpl implements BankDaoInterface{
     }
 
     /**
-     * 2.注册
-     * @param user
+     * 2.登录
+     * @param user 登录UserBean
+     * @exception BankSystemLoginException 登录异常
      */
     @Override
     public void login(UserBean user) throws BankSystemLoginException{
@@ -79,6 +81,11 @@ public class FileDaoImpl implements BankDaoInterface{
         proread = proread_login;
     }
 
+    /**
+     *3.余额查询
+     * @return 查询结果
+     * @throws BankSystemLoginException 未登录查询异常
+     */
     @Override
     public double inquire() throws BankSystemLoginException{
 
@@ -95,9 +102,9 @@ public class FileDaoImpl implements BankDaoInterface{
 
     /**
      * 取款
-     * @param money
-     * @throws AccountOverDrawnException
-     * @throws BankSystemLoginException
+     * @param money 取款金额
+     * @throws AccountOverDrawnException 取款金额非法异常
+     * @throws BankSystemLoginException  未登录异常
      */
     @Override
     public void withdrawals(double money) throws AccountOverDrawnException,BankSystemLoginException{
@@ -131,9 +138,9 @@ public class FileDaoImpl implements BankDaoInterface{
 
     /**
      * 存款
-     * @param money
-     * @throws InvalidDepositException
-     * @throws BankSystemLoginException
+     * @param money 存款金额
+     * @throws InvalidDepositException  存款金额非法异常
+     * @throws BankSystemLoginException 未登录异常
      */
     @Override
     public void dePosit(double money) throws InvalidDepositException,BankSystemLoginException{
@@ -161,10 +168,10 @@ public class FileDaoImpl implements BankDaoInterface{
 
     /**
      * 转账
-     * @param username
-     * @param money
-     * @throws BankSystemLoginException
-     * @throws TransferException
+     * @param username 转账用户名
+     * @param money    转账金额
+     * @throws BankSystemLoginException 未登录异常
+     * @throws TransferException        转账异常
      */
     @Override
     public void transfer(String username, double money) throws BankSystemLoginException,TransferException{
@@ -206,7 +213,7 @@ public class FileDaoImpl implements BankDaoInterface{
 
     /**
      *获取登录用户
-     * @return
+     * @return 已经登录的用户名,未登录返回null
      */
     @Override
     public String getLoginUserName() {
@@ -215,5 +222,15 @@ public class FileDaoImpl implements BankDaoInterface{
             return proread.getUsername();
 
         return null;
+    }
+
+    /**
+     * 注销
+     */
+    @Override
+    public void logOut() {
+
+        if(proread != null)
+            proread = null;
     }
 }

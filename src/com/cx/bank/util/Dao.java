@@ -5,6 +5,7 @@ import com.cx.bank.dao.BankDaoInterface;
 import java.util.HashMap;
 
 /**
+ * @version bak1.5
  * Created by Administrator on 2018/7/3.
  */
 public class Dao {
@@ -37,7 +38,7 @@ public class Dao {
 
         /**
          *seter
-         * @param properties
+         * @param properties 配置
          */
         public void setProperties(HashMap<String,String> properties){
 
@@ -46,7 +47,7 @@ public class Dao {
 
         /**
          * geter
-         * @return
+         * @return 配置集合
          */
         public HashMap<String, String> getProperties(){
 
@@ -81,7 +82,7 @@ public class Dao {
 
     /**
      * 获取dao实例 依据bankconfig.xml的dao配置
-     * @return
+     * @return dao实现
      * @throws ClassNotFoundException
      * @throws IllegalAccessException
      * @throws InstantiationException
@@ -89,5 +90,19 @@ public class Dao {
     public BankDaoInterface getInstance() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
 
         return (BankDaoInterface) Class.forName(instance).newInstance();
+    }
+
+    public static void main(String[] args) {
+
+        try {
+            System.out.println(new BankConfigure().getDao().getInstance());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        }
+
     }
 }

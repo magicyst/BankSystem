@@ -25,43 +25,51 @@ public interface BankDaoInterface {
 
     /**
      * 1.注册
-     * @param user
-     * @return
+     * @param user 用户bean
      */
-    public void register(UserBean user) throws IOException,BankSystemRegisterException;
+    void register(UserBean user) throws IOException,BankSystemRegisterException;
 
     /**
      * 2.登录
-     * @param user
+     * @param user 用户bean
      */
-    public void login(UserBean user) throws BankSystemLoginException;
+    void login(UserBean user) throws BankSystemLoginException;
 
     /**
      * 4.余额查询
      * @return 余额
      */
-    public double inquire() throws BankSystemLoginException;
+    double inquire() throws BankSystemLoginException;
 
     /**
      * 5.用户取款
-     * @param money
+     * @param money 取款金额
      * @throws AccountOverDrawnException
      */
-    public void withdrawals(double money) throws AccountOverDrawnException, BankSystemLoginException;
+    void withdrawals(double money) throws AccountOverDrawnException, BankSystemLoginException;
 
     /**
      * 6.用户存款
-     * @param money
+     * @param money 存款金额
      * @throws InvalidDepositException
      */
-    public void dePosit(double money) throws InvalidDepositException, BankSystemLoginException;
+    void dePosit(double money) throws InvalidDepositException, BankSystemLoginException;
 
     /**
      * 7.转账
-     * @param username
-     * @param money
+     * @param username 转账用户名
+     * @param money    转账金额
      */
-    public void transfer(String username,double money) throws BankSystemLoginException, TransferException;
+    void transfer(String username,double money) throws BankSystemLoginException, TransferException;
 
-    public String getLoginUserName();
+    /**
+     * 获取登录用户名
+     * @return 返回已登录用户名
+     */
+    String getLoginUserName();
+
+    /**
+     * 注销
+     */
+    void logOut();
 }

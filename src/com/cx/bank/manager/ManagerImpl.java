@@ -1,13 +1,16 @@
 package com.cx.bank.manager;
 
+import com.cx.bank.dao.BankDaoFactory;
 import com.cx.bank.dao.BankDaoInterface;
-import com.cx.bank.dao.FileDaoImpl;
 import com.cx.bank.model.UserBean;
 import com.cx.bank.util.*;
 
 import java.io.IOException;
 
 /**
+ * @version 1.5
+ * @author yst
+ * 业务层实现
  * Created by Administrator on 2018/6/12.
  */
 public class ManagerImpl implements BankService{
@@ -21,18 +24,29 @@ public class ManagerImpl implements BankService{
      *      5.注册
      *      6.登录
      */
-    private BankDaoInterface bankdao = new FileDaoImpl();//dao层的依赖
+    private BankDaoInterface bankdao;//dao层的依赖
     private static ManagerImpl managerinstance = null;   //单例
-    private String login_username = null;                //已经登录的用户
+    //private String login_username = null;                //已经登录的用户
 
     private ManagerImpl(){
 
+        try {
+            bankdao = BankDaoFactory.getDao();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
     /**
      * 单例对外接口
-     * @return
+     * @return 单例对外接口
      */
     public static ManagerImpl getInstance(){
 
@@ -55,9 +69,8 @@ public class ManagerImpl implements BankService{
 
     /**
      * 2.存款
-     * @param money
+     * @param money 存款金额
      * @exception InvalidDepositException
-     * @return 首先判断money为安全，否则返回-1.如果存储的金额小于等于0返回-1，否则存储成功返回成功的数额
      */
     public void dePosit(double money) throws InvalidDepositException, BankSystemLoginException {
 
@@ -68,7 +81,6 @@ public class ManagerImpl implements BankService{
     /**
      * 3.取款
      * @exception AccountOverDrawnException
-     * @return 如果money实例不安全返回-1，否则返回获取的金额。判断获取的金额是否为负，范鸥-1，否则返回金额
      */
     public void withdrawals(double money) throws AccountOverDrawnException, BankSystemLoginException {
 
@@ -81,8 +93,10 @@ public class ManagerImpl implements BankService{
      */
     public void exitSystem() {
 
-        this.login_username = null;
+        //this.login_username = null;
 
+        //注销
+        bankdao.logOut();
         System.exit(1);
 
     }
@@ -97,7 +111,7 @@ public class ManagerImpl implements BankService{
 
         bankdao.register(user);
 
-        this.login_username = bankdao.getLoginUserName();
+        //this.login_username = bankdao.getLoginUserName();
     }
 
     /**
@@ -108,13 +122,13 @@ public class ManagerImpl implements BankService{
 
         bankdao.login(user);
 
-        this.login_username = bankdao.getLoginUserName();
+        //this.login_username = bankdao.getLoginUserName();
     }
 
     /**
      * 7.转账
-     * @param username
-     * @param money
+     * @param username 目标用户名
+     * @param money    转账金额
      * @throws BankSystemLoginException
      * @throws TransferException
      */
@@ -126,14 +140,17 @@ public class ManagerImpl implements BankService{
 
     /**
      * 获取已登录用户名
-     * @return
+     * @return 返回登录用户名
      */
     @Override
     public String getLoginUserName() {
 
-        if(this.login_username != null)
-            return "欢迎、"+"("+login_username+")用户";
+        return bankdao.getLoginUserName();
+    }
 
-        return "未登录";
+    @Override
+    public void logOut() {
+
+        bankdao.logOut();
     }
 }

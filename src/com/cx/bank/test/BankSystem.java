@@ -11,7 +11,7 @@ import java.util.Scanner;
 /**
  * 银行系统入口:
  * Created by Administrator on 2018/6/12.
- * @version bank1.1
+ * @version bank1.5
  */
 public class BankSystem {
 
@@ -49,17 +49,14 @@ public class BankSystem {
         UserBean user = new UserBean();
 
         //临时记录
-        double temp = 0;
-        int cmd = 0;
+        //double temp;
+        int cmd;
 
         //2.while循环实现系统开始状态,接受用户命令
         while(true){
 
             //用户提示
             printHelpInfo(bankservice.getLoginUserName());
-
-            //结束用户指令
-            System.out.print("请输入命令[1,2,3,4,5,6,0]: ");
 
             //指令
             try {
@@ -223,6 +220,10 @@ public class BankSystem {
                         continue;
                     }
 
+                case 7:
+
+                    bankservice.logOut();
+                    continue;
 
                     //0.System.exit()模拟系统关闭
                 case 0:
@@ -272,8 +273,19 @@ public class BankSystem {
          *      0.退出
          * =========================
          */
+        String lab = "欢迎,"+username+"用户";
+        if(username == null) {
+            lab = "未登录";
+            System.out.println("=========<bank1.3>=========");
+            System.out.println("* "+lab+" *");
+            System.out.println("          4.注册");
+            System.out.println("          5.登录");
+            System.out.println("===========================");
+            System.out.print("请输入命令[4,5]: ");
+            return;
+        }
         System.out.println("=========<bank1.3>=========");
-        System.out.println("* "+username+" *");
+        System.out.println("* "+lab+" *");
         System.out.println("          1.查询");
         System.out.println("          2.存款");
         System.out.println("          3.取款");
@@ -282,6 +294,7 @@ public class BankSystem {
         System.out.println("          6.转账");
         System.out.println("          0.退出");
         System.out.println("===========================");
+        System.out.print("请输入命令[1,2,3,4,5,6,0]: ");
     }
 
 }

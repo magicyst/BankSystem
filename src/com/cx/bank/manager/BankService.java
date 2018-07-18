@@ -6,6 +6,9 @@ import com.cx.bank.util.*;
 import java.io.IOException;
 
 /**
+ * @version bank1.5
+ * @author Administrator yst
+ * 业务层服务接口
  * Created by Administrator on 2018/6/13.
  */
 
@@ -24,26 +27,29 @@ public interface BankService {
      */
 
     //1.银行金额的查询
-    public double inquiry() throws BankSystemLoginException;
+    double inquiry() throws BankSystemLoginException;
 
     //2.用户存款
-    public void dePosit(double money) throws InvalidDepositException, BankSystemLoginException;
+    void dePosit(double money) throws InvalidDepositException, BankSystemLoginException;
 
     //3.用户取款
-    public void withdrawals(double money) throws AccountOverDrawnException, BankSystemLoginException;
+    void withdrawals(double money) throws AccountOverDrawnException, BankSystemLoginException;
 
     //4.退出
-    public void exitSystem();
+    void exitSystem();
 
     //5.注册
-    public void register(UserBean user) throws IOException,BankSystemRegisterException;
+    void register(UserBean user) throws IOException,BankSystemRegisterException;
 
     //6.登录
-    public void login(UserBean user) throws BankSystemLoginException;
+    void login(UserBean user) throws BankSystemLoginException;
 
     //7.转账
-    public void transfer(String username,double money) throws BankSystemLoginException, TransferException;
+    void transfer(String username,double money) throws BankSystemLoginException, TransferException;
 
     //8.获取已登录用户名
-    public String getLoginUserName();
+    String getLoginUserName();
+
+    //9.注销
+    void logOut();
 }
