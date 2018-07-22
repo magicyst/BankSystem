@@ -43,7 +43,8 @@ public class BankSystem {
         Scanner input = new Scanner(System.in);
 
         //业务层依赖
-        BankService bankservice = ManagerImpl.getInstance();
+        //BankService bankservice = ManagerImpl.getInstance();
+        BankService bankservice = new ManagerImpl();
 
         //1.1 登录
         UserBean user = new UserBean();

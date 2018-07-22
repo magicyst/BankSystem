@@ -10,6 +10,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 /**
@@ -21,14 +23,29 @@ import java.io.IOException;
 public class GULBankSystem {
 
     public static void main(String[] args) {
-        new BankWindow();
+
+        //new BankWindow();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new BankWindow();
+            }
+        }).start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new BankWindow();
+            }
+        }).start();
     }
 }
 
 
 class BankWindow extends Frame {
 
-    BankService service = ManagerImpl.getInstance();
+    //BankService service = ManagerImpl.getInstance();
+    BankService service = new ManagerImpl();
     Image image;//logo
     private JFrame manager_jf;//主面板
     private JFrame login_jf;
@@ -58,32 +75,29 @@ class BankWindow extends Frame {
 
     public BankWindow() {
 
+        //为窗口初始化事件监听
+        //initFrames();
+        //为所有按钮初始化点击事件监听
         initButtons();
-        //frameInit();//初始化
 
-        loginFrame();//登录界面显示
-
-        //managerFrame();
-
-        //manager_jf.setVisible(true);
+        //创建登录界面并显示
+        newLoginFrame();
         login_jf.setVisible(true);
 
 
     }
 
-    public void frameInit() {
-
-
-    }
-
-    public void loginFrame() {
+    /**
+     * 创建登录页面 但是没用显示设置为显示
+     */
+    public void newLoginFrame() {
 
         pass_ipt.setText("");
         login_jf = new JFrame();
 
         //登录页面设置
         login_jf.setTitle("登录系统");
-        login_jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        login_jf.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         login_jf.setLocationRelativeTo(null);
         login_jf.setIconImage(image);
         login_jf.setSize(400, 400);
@@ -122,12 +136,15 @@ class BankWindow extends Frame {
         //jf.setVisible(true);
     }
 
-    private void managerFrame() {
+    /**
+     * 创建登录之后的系统页面，当时没用设置为显示状态
+     */
+    private void newManagerFrame() {
 
         manager_jf = new JFrame();
         //系统界面设置
         manager_jf.setTitle("银行系统");
-        manager_jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        manager_jf.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         manager_jf.setLocationRelativeTo(null);
         manager_jf.setIconImage(image);
         manager_jf.setSize(300, 400);
@@ -182,7 +199,34 @@ class BankWindow extends Frame {
 
         //manager_jf.pack();
 
+        //为所有的窗口的关闭事件添加监听
+        manager_jf.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+
+                //用户误操作提示，
+                int flag = JOptionPane.showConfirmDialog(null, "关闭窗口用户名将注销,是否关闭？", "系统提示", JOptionPane.YES_NO_OPTION);
+
+                //如果flag为0色注销
+                if(flag == 0) {
+                    //注销用户,user_pool注销用户
+                    service.logOut();
+
+                    //注销窗口
+                    manager_jf.dispose();
+
+                    //提示
+                    JOptionPane.showMessageDialog(null, "注销成功", "系统提示", JOptionPane.INFORMATION_MESSAGE);
+
+                    //重建登录页面并显示
+                    newLoginFrame();
+                    login_jf.setVisible(true);
+                }
+            }
+        });
+
     }
+
 
     private void initButtons() {
 
@@ -205,10 +249,12 @@ class BankWindow extends Frame {
                     try {
                         //登录
                         service.login(user);
+
                         //无异常则登录成功
                         JOptionPane.showMessageDialog(null, "登录成功", "系统提示", JOptionPane.INFORMATION_MESSAGE);
-                        login_jf.setVisible(false);
-                        managerFrame();
+                        //login_jf.setVisible(false);
+                        login_jf.dispose();//关闭登录窗口
+                        newManagerFrame();
                         manager_jf.setVisible(true);
                     } catch (BankSystemLoginException e1) {
 
@@ -245,7 +291,7 @@ class BankWindow extends Frame {
                         JOptionPane.showMessageDialog(null, "注册成功", "系统提示", JOptionPane.INFORMATION_MESSAGE);
                         login_jf.setVisible(false);
 
-                        managerFrame();
+                        newManagerFrame();
                         manager_jf.setVisible(true);
                     } catch (IOException e1) {
 
@@ -415,18 +461,23 @@ class BankWindow extends Frame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                //注销用户
-                service.logOut();
+                //用户误操作提示，
+                int flag = JOptionPane.showConfirmDialog(null,"是否注销？","系统提示",JOptionPane.YES_NO_OPTION);
 
-                //系统页面隐藏
-                manager_jf.setVisible(false);
+                if(flag == 0) {
+                    //注销用户,user_pool注销用户
+                    service.logOut();
 
-                //提示
-                JOptionPane.showMessageDialog(null, "注销成功", "系统提示", JOptionPane.INFORMATION_MESSAGE);
+                    //注销窗口
+                    manager_jf.dispose();
 
-                //显示登录页面
-                loginFrame();
-                login_jf.setVisible(true);
+                    //提示
+                    JOptionPane.showMessageDialog(null, "注销成功", "系统提示", JOptionPane.INFORMATION_MESSAGE);
+
+                    //重建登录页面并显示
+                    newLoginFrame();
+                    login_jf.setVisible(true);
+                }
             }
         });
 
@@ -436,6 +487,9 @@ class BankWindow extends Frame {
             public void actionPerformed(ActionEvent e) {
 
                 service.exitSystem();
+
+                //关闭窗口
+                manager_jf.dispose();
             }
         });
     }

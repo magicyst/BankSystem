@@ -25,13 +25,14 @@ public class ManagerImpl implements BankService{
      *      6.登录
      */
     private BankDaoInterface bankdao;//dao层的依赖
-    private static ManagerImpl managerinstance = null;   //单例
+    //private volatile static ManagerImpl managerinstance = null;   //单例
+
     //private String login_username = null;                //已经登录的用户
 
-    private ManagerImpl(){
+    public ManagerImpl(){
 
         try {
-            bankdao = BankDaoFactory.getDao();
+            bankdao = BankDaoFactory.getInstance().getDao();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -48,14 +49,17 @@ public class ManagerImpl implements BankService{
      * 单例对外接口
      * @return 单例对外接口
      */
-    public static ManagerImpl getInstance(){
+    /*public static synchronized ManagerImpl getInstance(){
 
         //如果单例为空，创建单例对象
         if(managerinstance == null)
-            managerinstance = new ManagerImpl();
-
+            //synchronized (ManagerImpl.class) {
+                //if(managerinstance == null) {
+                    managerinstance = new ManagerImpl();
+                //}
+            //}
         return managerinstance;
-    }
+    }*/
 
     /**
      * 1.查询
@@ -97,7 +101,6 @@ public class ManagerImpl implements BankService{
 
         //注销
         bankdao.logOut();
-        System.exit(1);
 
     }
 

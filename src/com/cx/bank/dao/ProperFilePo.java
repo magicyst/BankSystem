@@ -6,16 +6,22 @@ import java.io.*;
 import java.util.Properties;
 
 /**
+ * @version bank1.5
  * Created by Administrator on 2018/6/22.
  *
  * 这是一个文件持久化文件对象及按用户名为关键字的Properties对象(Po)
  *
+ * 因为引用的user_pool，所有不可能出现两个相同的用户在线的情况，
+ * 所以线程安全问题的只有转账,会同时操作对方的数据money，所有多money的操作需要同步锁
  *
+ *多线程环境下，get set 方法需要同步。 两个人同时转账个一个人的时候会出现线程安全问题
  */
 public class ProperFilePo {
 
     //用户信息文件的储存格式
-    public static final String Template_url = ProperFilePo.class.getResource("/").getPath()+"filedata\\template.properties";
+    public static final String Template_url = ProperFilePo.class.getResource("/").getPath()
+            +"filedata\\template.properties";
+
     private String username;    //用户名
     private String password;    //密码
     private Double money;       //余额
@@ -33,6 +39,7 @@ public class ProperFilePo {
         } catch(FileNotFoundException e){
 
             System.out.println("初始化文件资源异常!");
+            e.printStackTrace();
         } catch(IOException e){
 
             try {
@@ -182,7 +189,12 @@ public class ProperFilePo {
         return money;
     }
 
-    public void setMoney(Double money) {
+    /**
+     * 由于转账会出现：同时转账一个人的情况，所有对money的需改操作需要同步
+     * synchronized为this锁
+     * @param money 设置的值
+     */
+    public synchronized void setMoney(Double money) {
         this.money = money;
     }
 }

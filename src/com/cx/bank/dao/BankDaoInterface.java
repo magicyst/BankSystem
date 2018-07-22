@@ -6,7 +6,7 @@ import com.cx.bank.util.*;
 import java.io.IOException;
 
 /**
- * @version bank1.3
+ * @version bank1.5
  * Created by Administrator on 2018/6/20.
  */
 public interface BankDaoInterface {

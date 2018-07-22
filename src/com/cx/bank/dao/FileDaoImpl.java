@@ -5,8 +5,10 @@ import com.cx.bank.util.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
+ * @version bank1.5
  * Created by Administrator on 2018/6/20.
  *
  * 文件存储类:
@@ -20,11 +22,14 @@ public class FileDaoImpl implements BankDaoInterface{
      *      2.登录
      */
 
-    //该文件dao维持的一个用户Properties文件对象
-    private static ProperFilePo proread = null;
+    //该文件dao维持的一个用户Properties文件对象(多线程环境下，当前线程的登录用)
+    private ProperFilePo current_user = null;
+
+    //已经登录的用户名，用户池
+    private static final HashMap<String,ProperFilePo> user_pool = new HashMap();
+
     //文件存储路径
     public  static final String FILE_URL = FileDaoImpl.class.getResource("/").getPath()+"filedata\\register\\";
-
 
 
     /**
@@ -51,11 +56,15 @@ public class FileDaoImpl implements BankDaoInterface{
         proread_register.setPassword(MD5Util.getMD5(user.getPassword()));
         proread_register.setUsername(user.getUsername());
 
+
         //如果注册在该语句之前没有抛出异常，这让改对象维持改注册用户的Properties文件对象
-        proread = proread_register;
+        current_user = proread_register;
 
         //该用户Properties对象持久化
-        proread.store();
+        current_user.store();
+
+        //放入已经注册的用户池
+        user_pool.put(proread_register.getUsername(),proread_register);
 
     }
 
@@ -66,6 +75,10 @@ public class FileDaoImpl implements BankDaoInterface{
      */
     @Override
     public void login(UserBean user) throws BankSystemLoginException{
+
+        //检测当前用户池
+        if(user_pool.get(user.getUsername()) != null)
+            throw new BankSystemLoginException("该用户在异地登录");
 
         //创建一个默认用户文件对象
         ProperFilePo proread_login = new ProperFilePo();
@@ -78,7 +91,10 @@ public class FileDaoImpl implements BankDaoInterface{
             throw new BankSystemLoginException("密码不正确!");
 
         //如果登录没有异常,这可以维持改用户Properties文件对象
-        proread = proread_login;
+        current_user = proread_login;
+
+        //放入已经登录的用户池
+        user_pool.put(proread_login.getUsername(),proread_login);
     }
 
     /**
@@ -89,14 +105,15 @@ public class FileDaoImpl implements BankDaoInterface{
     @Override
     public double inquire() throws BankSystemLoginException{
 
-        if(proread != null){
+        if(current_user != null){
 
             //重新更新文件对象
-            proread.load(proread.getUsername());
-            return proread.getMoney();
+            current_user.load(current_user.getUsername());
+            return current_user.getMoney();
         }
         else
             throw new BankSystemLoginException("请注册或者登录!");
+
 
     }
 
@@ -110,7 +127,7 @@ public class FileDaoImpl implements BankDaoInterface{
     public void withdrawals(double money) throws AccountOverDrawnException,BankSystemLoginException{
 
         //如果未登录调用
-        if(proread == null)
+        if(current_user == null)
             throw new BankSystemLoginException("请注册或者登录!");
 
         //如果取款金额为负数
@@ -118,19 +135,19 @@ public class FileDaoImpl implements BankDaoInterface{
             throw new AccountOverDrawnException("取款为负异常");
 
         //如果取款金额大于余额
-        if(money > proread.getMoney())
+        if(money > current_user.getMoney())
             throw new AccountOverDrawnException("余额不足"+money+"元!");
 
         //无异常，则取款
 
         //重新更新文件对象，防止系统崩溃后取款信息无法返回服务器
-        proread.load(proread.getUsername());
+        current_user.load(current_user.getUsername());
 
-        proread.setMoney(proread.getMoney()-money);
+        current_user.setMoney(current_user.getMoney()-money);
 
         //对象回显到文件
         try {
-            proread.store();
+            current_user.store();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -145,7 +162,7 @@ public class FileDaoImpl implements BankDaoInterface{
     @Override
     public void dePosit(double money) throws InvalidDepositException,BankSystemLoginException{
 
-        if(proread == null)
+        if(current_user == null)
             throw new BankSystemLoginException("请注册或者登录!");
 
         //如果存款金额为负数
@@ -153,14 +170,14 @@ public class FileDaoImpl implements BankDaoInterface{
             throw new InvalidDepositException("存款为负异常");
 
         //重新更新文件对象，防止系统崩溃后存款信息无法返回服务器
-        proread.load(proread.getUsername());
+        current_user.load(current_user.getUsername());
 
         //无异常，则存款
-        proread.setMoney(proread.getMoney()+money);
+        current_user.setMoney(current_user.getMoney()+money);
 
         //对象回显到文件
         try {
-            proread.store();
+            current_user.store();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -176,11 +193,11 @@ public class FileDaoImpl implements BankDaoInterface{
     @Override
     public void transfer(String username, double money) throws BankSystemLoginException,TransferException{
 
-        if(proread == null)
+        if(current_user == null)
             throw new BankSystemLoginException("请注册或者登录!");
 
         //转账金额大于余额
-        if(money > proread.getMoney())
+        if(money > current_user.getMoney())
             throw new TransferException("余额不足!");
 
         //如果存款金额为负数
@@ -199,10 +216,10 @@ public class FileDaoImpl implements BankDaoInterface{
             transfer_user.store();
 
             //如果转账异常，不执行用户扣钱操作
-            proread.setMoney(proread.getMoney()-money);
+            current_user.setMoney(current_user.getMoney()-money);
 
             //客户信息回显,如果可以回显失败?(遗留问题:应该用线程的原子性锁)
-            proread.store();
+            current_user.store();
         } catch (IOException e) {
 
             //如果回显异常,抛出转账异常
@@ -218,8 +235,8 @@ public class FileDaoImpl implements BankDaoInterface{
     @Override
     public String getLoginUserName() {
 
-        if(proread != null)
-            return proread.getUsername();
+        if(current_user != null)
+            return current_user.getUsername();
 
         return null;
     }
@@ -230,7 +247,11 @@ public class FileDaoImpl implements BankDaoInterface{
     @Override
     public void logOut() {
 
-        if(proread != null)
-            proread = null;
+        //用户池移出当前用户对象
+        user_pool.remove(current_user.getUsername());
+
+        //当前用户为空
+        if(current_user != null)
+            current_user = null;
     }
 }
